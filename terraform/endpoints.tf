@@ -34,7 +34,7 @@ resource "aws_security_group" "iac_exercise_endpoints" {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    security_groups = [aws_security_group.tasks.id] // tasks security group
+    security_groups = [aws_security_group.task_sg.id] // tasks security group
     // Also allow the public and private subnet CIDRs as a fallback
     cidr_blocks     = concat(
       [for s in aws_subnet.iac_exercise_public : s.cidr_block],

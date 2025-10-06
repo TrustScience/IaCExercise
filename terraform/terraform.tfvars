@@ -8,7 +8,7 @@ env_vars = {
 
 cpu         = 512
 memory      = 1024
-container_port = 8080
+container_port = 80
 
 
 desired_count         = 2

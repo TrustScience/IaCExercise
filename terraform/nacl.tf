@@ -1,28 +1,52 @@
-# resource "aws_network_acl" "iac_exercise_nacl" {
+# data "aws_prefix_list" "ecr" {
+#   name = "com.amazonaws.${var.region}.ecr"
+# }
+
+# resource "aws_network_acl" "main" {
 #   vpc_id = aws_vpc.iac_exercise_vpc.id
 
-#   # Allow all inbound/outbound traffic on the VPC (default expected for most setups).
-#   # Previously this NACL restricted egress to a private cidr which prevented
-#   # ECS tasks in private subnets from reaching ECR over HTTPS, causing i/o timeouts.
 #   egress {
-#     protocol   = "-1"
-#     rule_no    = 100
+#     protocol   = "tcp"
+#     rule_no    = 200
 #     action     = "allow"
-#     cidr_block = "0.0.0.0/0"
-#     from_port  = 0
-#     to_port    = 0
+#     cidr_block = var.vpc_cidr
+#     from_port  = 443
+#     to_port    = 443
 #   }
 
 #   ingress {
-#     protocol   = "-1"
+#     protocol   = "tcp"
 #     rule_no    = 100
 #     action     = "allow"
-#     cidr_block = "0.0.0.0/0"
-#     from_port  = 0
-#     to_port    = 0
+#     cidr_block = var.vpc_cidr
+#     from_port  = 80
+#     to_port    = 80
 #   }
 
 #   tags = {
 #     Name = "main"
 #   }
 # }
+
+# resource "aws_network_acl_rule" "iac_exercise_ecr_outbound_nacl" {
+#   network_acl_id = aws_network_acl.main.id
+#   rule_number    = 100
+#   egress         = true
+#   protocol       = "tcp"
+#   rule_action    = "allow"
+#   from_port      = 443
+#   to_port        = 443
+#   cidr_block     = data.aws_prefix_list.ecr.cidr_blocks
+# }
+
+# resource "aws_network_acl_rule" "ecr_inbound_nacl" {
+#   network_acl_id = aws_network_acl.main.id
+#   rule_number    = 101
+#   egress         = false
+#   protocol       = "tcp"
+#   rule_action    = "allow"
+#   from_port      = 1024 # Ephemeral port range for return traffic
+#   to_port        = 65535 # Ephemeral port range for return traffic
+#   cidr_block     = data.aws_prefix_list.ecr.cidr_blocks
+# }
+

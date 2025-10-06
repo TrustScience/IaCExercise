@@ -141,3 +141,20 @@ variable "assign_public_ip" {
   default     = false
 }
 
+variable "flow_logs_enabled" {
+  description = "Enable VPC Flow Logs to CloudWatch"
+  type        = bool
+  default     = true
+}
+
+variable "flow_logs_retention_days" {
+  description = "CloudWatch Logs retention for VPC Flow Logs"
+  type        = number
+  default     = 30
+}
+
+variable "flow_logs_traffic_type" {
+  description = "Traffic captured by flow logs: ACCEPT | REJECT | ALL"
+  type        = string
+  default     = "ALL"
+}

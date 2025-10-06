@@ -23,28 +23,32 @@ output "private_subnet_cidrs" {
   description = "Private subnet CIDRs"
 }
 
-# output "nat_gateway_ids" {
-#   value       = [for k, n in aws_nat_gateway.iac_exercise_ngw : n.id]
-#   description = "NAT Gateway IDs (per AZ)"
-# }
+output "nat_gateway_ids" {
+  value       = [for k, n in aws_nat_gateway.iac_exercise_ngw : n.id]
+  description = "NAT Gateway IDs (per AZ)"
+}
 
 output "alb_dns_name" {
-  value       = aws_lb.app_alb.dns_name
+  value       = aws_lb.iac_exercise_app_alb.dns_name
   description = "Public DNS of the Application Load Balancer"
 }
 
 output "service_name" {
-  value       = aws_ecs_service.app.name
+  value       = aws_ecs_service.iac_exercise_app_service.name
   description = "ECS Service name"
 }
 
 output "cluster_name" {
-  value       = aws_ecs_cluster.this.name
+  value       = aws_ecs_cluster.iac_exercise_cluster.name
   description = "ECS Cluster name"
 }
 
+# output "alb_dns_name" {
+#   value       = aws_lb.app_alb.dns_name
+#   description = "Public DNS of the ALB"
+# }
 
-output "target_group_arn" {
-  value       = aws_lb_target_group.app_tg.arn
-  description = "ARN of the target group"
-}
+# output "target_group_arn" {
+#   value       = aws_lb_target_group.app_tg.arn
+#   description = "ARN of the target group"
+# }
