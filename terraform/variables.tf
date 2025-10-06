@@ -117,17 +117,17 @@ variable "ssm_param_names" {
 }
 
 # Optional HTTPS
-variable "enable_https" {
-  type        = bool
-  description = "Create HTTPS listener on 443"
-  default     = false
-}
+# variable "enable_https" {
+#   type        = bool
+#   description = "Create HTTPS listener on 443"
+#   default     = false
+# }
 
-variable "acm_certificate_arn" {
-  type        = string
-  description = "ACM cert ARN for HTTPS (required if enable_https = true)"
-  default     = ""
-}
+# variable "acm_certificate_arn" {
+#   type        = string
+#   description = "ACM cert ARN for HTTPS (required if enable_https = true)"
+#   default     = ""
+# }
 
 # Optional: if HTTPS enabled, should HTTP 80 redirect?
 variable "http_redirect_to_https" {
