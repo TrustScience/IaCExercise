@@ -158,3 +158,9 @@ variable "flow_logs_traffic_type" {
   type        = string
   default     = "ALL"
 }
+
+variable "alarm_sns_topic_arn" {
+  description = "Optional SNS topic ARN to notify on image pull errors"
+  type        = string
+  default     = ""
+}
