@@ -47,9 +47,15 @@ jobs:
         VPC_ID=$(terraform output -raw vpc_id)
         PUBLIC_SUBNETS=$(terraform output -json public_subnet_ids)
         PRIVATE_SUBNETS=$(terraform output -json private_subnet_ids)
+        ECR_URL=$(terraform output -raw ecr_repository_url)
+        ECS_CLUSTER=$(terraform output -raw ecs_cluster_name)
+        ECS_SERVICE=$(terraform output -raw ecs_service_name)
         echo "vpc_id=$VPC_ID" >> $GITHUB_OUTPUT
         echo "public_subnets=$PUBLIC_SUBNETS" >> $GITHUB_OUTPUT
         echo "private_subnets=$PRIVATE_SUBNETS" >> $GITHUB_OUTPUT
+        echo "ecr_url=$ECR_URL" >> $GITHUB_OUTPUT
+        echo "ecs_cluster=$ECS_CLUSTER" >> $GITHUB_OUTPUT
+        echo "ecs_service=$ECS_SERVICE" >> $GITHUB_OUTPUT
       working-directory: ./infra
 
     - name: Post-deployment summary
@@ -57,5 +63,8 @@ jobs:
         echo "✅ Development deployment completed successfully!"
         echo "🌐 VPC ID: ${{ steps.terraform-output.outputs.vpc_id }}"
         echo "🔗 Public Subnets: ${{ steps.terraform-output.outputs.public_subnets }}"
-        echo "� Private Subnets: ${{ steps.terraform-output.outputs.private_subnets }}"
-        echo "📊 Infrastructure foundation ready for ALB + ECS Fargate!"
+        echo "🔒 Private Subnets: ${{ steps.terraform-output.outputs.private_subnets }}"
+        echo "📦 ECR Repository: ${{ steps.terraform-output.outputs.ecr_url }}"
+        echo "🚀 ECS Cluster: ${{ steps.terraform-output.outputs.ecs_cluster }}"
+        echo "⚙️  ECS Service: ${{ steps.terraform-output.outputs.ecs_service }}"
+        echo "📊 Infrastructure ready! Build and push your container to deploy the application."
