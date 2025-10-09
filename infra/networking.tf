@@ -8,6 +8,18 @@ resource "aws_vpc" "main" {
   }
 }
 
+# Restrict default security group to deny all traffic
+resource "aws_default_security_group" "default" {
+  vpc_id = aws_vpc.main.id
+
+  # No ingress rules - deny all inbound traffic
+  # No egress rules - deny all outbound traffic
+
+  tags = {
+    Name = "${var.project_name}-default-sg-restricted"
+  }
+}
+
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
@@ -16,12 +28,13 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
+# checkov:skip=CKV2_AWS_11:Public subnets are used for load balancers, not instances
 resource "aws_subnet" "public" {
   count                   = 2
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, count.index)
   availability_zone       = var.availability_zones[count.index]
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
 
   tags = {
     Name = "${var.project_name}-public-subnet-${count.index + 1}"

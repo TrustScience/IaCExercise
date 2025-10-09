@@ -1,7 +1,9 @@
+# checkov:skip=CKV_AWS_260:Public ALB requires open HTTP/HTTPS access
 resource "aws_security_group" "alb" {
   name_prefix = "${var.project_name}-alb-"
   vpc_id      = aws_vpc.main.id
 
+  # checkov:skip=CKV_AWS_260:Public ALB intentionally allows HTTP from internet
   ingress {
     description = "HTTP from anywhere"
     from_port   = 80
