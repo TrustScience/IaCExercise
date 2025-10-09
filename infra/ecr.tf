@@ -1,6 +1,7 @@
+# checkov:skip=CKV_AWS_136:AES encryption is acceptable for this exercise
 resource "aws_ecr_repository" "app" {
   name                 = "${var.project_name}-app"
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "IMMUTABLE"
 
   image_scanning_configuration {
     scan_on_push = true

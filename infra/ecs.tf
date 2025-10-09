@@ -11,13 +11,74 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
+resource "aws_kms_key" "cloudwatch_logs" {
+  description             = "KMS key for CloudWatch Logs encryption"
+  deletion_window_in_days = 10
+  enable_key_rotation     = true
+
+  tags = {
+    Name = "${var.project_name}-cloudwatch-logs-key"
+  }
+}
+
+resource "aws_kms_alias" "cloudwatch_logs" {
+  name          = "alias/${var.project_name}-cloudwatch-logs"
+  target_key_id = aws_kms_key.cloudwatch_logs.key_id
+}
+
+resource "aws_kms_key_policy" "cloudwatch_logs" {
+  key_id = aws_kms_key.cloudwatch_logs.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Enable IAM User Permissions"
+        Effect = "Allow"
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        }
+        Action   = "kms:*"
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow CloudWatch Logs"
+        Effect = "Allow"
+        Principal = {
+          Service = "logs.${var.aws_region}.amazonaws.com"
+        }
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:CreateGrant",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+        Condition = {
+          ArnLike = {
+            "kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/${var.project_name}"
+          }
+        }
+      }
+    ]
+  })
+}
+
+data "aws_caller_identity" "current" {}
+
+# checkov:skip=CKV_AWS_338:Intentionally set 7 days for this exercise
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/${var.project_name}"
   retention_in_days = 7
+  kms_key_id        = aws_kms_key.cloudwatch_logs.arn
 
   tags = {
     Name = "${var.project_name}-ecs-logs"
   }
+
+  depends_on = [aws_kms_key_policy.cloudwatch_logs]
 }
 
 resource "aws_iam_role" "ecs_task_execution" {
@@ -140,6 +201,7 @@ resource "aws_ecs_task_definition" "app" {
 
 resource "aws_security_group" "ecs_tasks" {
   name_prefix = "${var.project_name}-ecs-tasks-"
+  description = "Security group for ECS Fargate tasks"
   vpc_id      = aws_vpc.main.id
 
   ingress {
