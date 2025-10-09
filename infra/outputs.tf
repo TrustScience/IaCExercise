@@ -14,6 +14,11 @@ output "private_subnet_ids" {
   value       = aws_subnet.private[*].id
 }
 
+output "firewall_subnet_ids" {
+  description = "IDs of the firewall subnets"
+  value       = aws_subnet.firewall[*].id
+}
+
 output "internet_gateway_id" {
   description = "ID of the Internet Gateway"
   value       = aws_internet_gateway.main.id
@@ -96,4 +101,20 @@ output "acm_certificate_arn" {
 output "certificate_domain" {
   description = "Domain name on the self-signed certificate"
   value       = "${var.project_name}-alb.local"
+}
+
+# ====== Network Firewall Outputs ======
+output "network_firewall_id" {
+  description = "ID of the Network Firewall"
+  value       = aws_networkfirewall_firewall.main.id
+}
+
+output "network_firewall_arn" {
+  description = "ARN of the Network Firewall"
+  value       = aws_networkfirewall_firewall.main.arn
+}
+
+output "network_firewall_policy_arn" {
+  description = "ARN of the Network Firewall policy"
+  value       = aws_networkfirewall_firewall_policy.main.arn
 }
