@@ -73,11 +73,27 @@ output "alb_arn" {
 }
 
 output "alb_url" {
-  description = "URL to access the application via ALB"
+  description = "URL to access the application via ALB (HTTPS)"
+  value       = "https://${aws_lb.main.dns_name}"
+}
+
+output "alb_http_url" {
+  description = "HTTP URL (redirects to HTTPS)"
   value       = "http://${aws_lb.main.dns_name}"
 }
 
 output "target_group_arn" {
   description = "ARN of the ALB target group"
   value       = aws_lb_target_group.app.arn
+}
+
+# ====== Certificate Outputs ======
+output "acm_certificate_arn" {
+  description = "ARN of the ACM certificate for ALB HTTPS"
+  value       = aws_acm_certificate.alb.arn
+}
+
+output "certificate_domain" {
+  description = "Domain name on the self-signed certificate"
+  value       = "${var.project_name}-alb.local"
 }

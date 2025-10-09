@@ -1,4 +1,3 @@
-# ECS Cluster
 resource "aws_ecs_cluster" "main" {
   name = "${var.project_name}-cluster"
 
@@ -12,7 +11,6 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
-# CloudWatch Log Group for ECS
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/${var.project_name}"
   retention_in_days = 7
@@ -22,7 +20,6 @@ resource "aws_cloudwatch_log_group" "ecs" {
   }
 }
 
-# ECS Task Execution Role
 resource "aws_iam_role" "ecs_task_execution" {
   name = "${var.project_name}-ecs-task-execution"
 
@@ -42,13 +39,11 @@ resource "aws_iam_role" "ecs_task_execution" {
   }
 }
 
-# Attach AWS managed policy for ECS task execution
 resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   role       = aws_iam_role.ecs_task_execution.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# ECS Task Role (for application permissions)
 resource "aws_iam_role" "ecs_task" {
   name = "${var.project_name}-ecs-task"
 
@@ -68,7 +63,35 @@ resource "aws_iam_role" "ecs_task" {
   }
 }
 
-# ECS Task Definition
+resource "aws_iam_policy" "ecs_task" {
+  name        = "${var.project_name}-ecs-task-policy"
+  description = "Least-privilege policy for ECS task role"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCloudWatchLogsWrite"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "${aws_cloudwatch_log_group.ecs.arn}:*"
+      }
+    ]
+  })
+
+  tags = {
+    Name = "${var.project_name}-ecs-task-policy"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task" {
+  role       = aws_iam_role.ecs_task.name
+  policy_arn = aws_iam_policy.ecs_task.arn
+}
+
 resource "aws_ecs_task_definition" "app" {
   family                   = "${var.project_name}-app"
   network_mode             = "awsvpc"
@@ -115,7 +138,6 @@ resource "aws_ecs_task_definition" "app" {
   }
 }
 
-# Security Group for ECS Tasks
 resource "aws_security_group" "ecs_tasks" {
   name_prefix = "${var.project_name}-ecs-tasks-"
   vpc_id      = aws_vpc.main.id
@@ -145,7 +167,6 @@ resource "aws_security_group" "ecs_tasks" {
   }
 }
 
-# ECS Service
 resource "aws_ecs_service" "app" {
   name            = "${var.project_name}-service"
   cluster         = aws_ecs_cluster.main.id
@@ -169,10 +190,33 @@ resource "aws_ecs_service" "app" {
     Name = "${var.project_name}-ecs-service"
   }
 
-  # Allow external changes without Terraform plan difference
   lifecycle {
     ignore_changes = [desired_count]
   }
 
   depends_on = [aws_lb_listener.http]
+}
+
+resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {
+  alarm_name          = "${var.project_name}-ecs-cpu-high"
+  alarm_description   = "Alert when ECS task CPU exceeds threshold"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = 300 # 5 minutes
+  statistic           = "Average"
+  threshold           = 80
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.main.name
+    ServiceName = aws_ecs_service.app.name
+  }
+
+  alarm_actions = []
+
+  tags = {
+    Name = "${var.project_name}-ecs-cpu-alarm"
+  }
 }
