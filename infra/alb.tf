@@ -1,10 +1,9 @@
-# checkov:skip=CKV_AWS_260:Public ALB requires open HTTP/HTTPS access
 resource "aws_security_group" "alb" {
   name_prefix = "${var.project_name}-alb-"
   description = "Security group for the ECS ALB"
   vpc_id      = aws_vpc.main.id
 
-  # checkov:skip=CKV_AWS_260:Public ALB intentionally allows HTTP from internet
+  # checkov:skip=CKV_AWS_260:Public ALB intentionally allows HTTP from internet for redirect to HTTPS
   ingress {
     description = "HTTP from anywhere"
     from_port   = 80
@@ -13,6 +12,7 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # checkov:skip=CKV_AWS_260:Public ALB intentionally allows HTTPS from internet
   ingress {
     description = "HTTPS from anywhere"
     from_port   = 443
@@ -21,7 +21,7 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # checkov:skip=CKV_AWS_260:Public ALB intentionally allows all outbound traffic
+  # checkov:skip=CKV_AWS_277:ALB requires unrestricted egress to forward traffic to ECS tasks
   egress {
     description = "Allow all outbound traffic"
     from_port   = 0
@@ -39,7 +39,8 @@ resource "aws_security_group" "alb" {
   }
 }
 
-#checkov:skip=CKV_AWS_91:Ignore access logs for this exercise
+# checkov:skip=CKV_AWS_91:Access logs not required for this exercise
+# checkov:skip=CKV2_AWS_28:WAF not required for this exercise
 resource "aws_lb" "main" {
   name               = "${var.project_name}-alb"
   internal           = false

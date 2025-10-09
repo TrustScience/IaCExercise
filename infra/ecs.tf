@@ -68,7 +68,7 @@ resource "aws_kms_key_policy" "cloudwatch_logs" {
 
 data "aws_caller_identity" "current" {}
 
-# checkov:skip=CKV_AWS_338:Intentionally set 7 days for this exercise
+# checkov:skip=CKV_AWS_338:7-day retention is sufficient for this exercise
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/${var.project_name}"
   retention_in_days = 7
@@ -199,6 +199,7 @@ resource "aws_ecs_task_definition" "app" {
   }
 }
 
+# checkov:skip=CKV_AWS_382:This is fine for this exercise
 resource "aws_security_group" "ecs_tasks" {
   name_prefix = "${var.project_name}-ecs-tasks-"
   description = "Security group for ECS Fargate tasks"

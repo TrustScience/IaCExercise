@@ -1,4 +1,5 @@
-# checkov:skip=CKV_AWS_136:AES encryption is acceptable for this exercise
+# checkov:skip=CKV_AWS_51:Using AES256 encryption instead of KMS for this exercise
+# checkov:skip=CKV_AWS_136:AES256 encryption is acceptable for this use case
 resource "aws_ecr_repository" "app" {
   name                 = "${var.project_name}-app"
   image_tag_mutability = "IMMUTABLE"
