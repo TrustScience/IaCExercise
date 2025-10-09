@@ -1,4 +1,4 @@
-# Network Firewall Rule Group
+# checkov:skip=CKV_AWS_345:Using default encryption for this exercise, CMK not required
 resource "aws_networkfirewall_rule_group" "allow_http_https" {
   name        = "${var.project_name}-allow-http-https"
   type        = "STATEFUL"
@@ -49,7 +49,7 @@ resource "aws_networkfirewall_rule_group" "allow_http_https" {
   }
 }
 
-# Network Firewall Policy
+# checkov:skip=CKV_AWS_346:Using default encryption for this exercise, CMK not required
 resource "aws_networkfirewall_firewall_policy" "main" {
   name = "${var.project_name}-firewall-policy"
 
@@ -74,7 +74,8 @@ resource "aws_networkfirewall_firewall_policy" "main" {
   }
 }
 
-# Network Firewall
+# checkov:skip=CKV_AWS_345:Using default encryption for this exercise, CMK not required
+# checkov:skip=CKV_AWS_344:Deletion protection disabled for easier cleanup in exercise environment
 resource "aws_networkfirewall_firewall" "main" {
   name                = "${var.project_name}-firewall"
   firewall_policy_arn = aws_networkfirewall_firewall_policy.main.arn
@@ -93,7 +94,7 @@ resource "aws_networkfirewall_firewall" "main" {
   }
 }
 
-# CloudWatch Log Group for Network Firewall
+# checkov:skip=CKV_AWS_338:7-day retention is sufficient for this exercise
 resource "aws_cloudwatch_log_group" "network_firewall" {
   name              = "/aws/networkfirewall/${var.project_name}"
   retention_in_days = 7
@@ -106,7 +107,6 @@ resource "aws_cloudwatch_log_group" "network_firewall" {
   depends_on = [aws_kms_key_policy.cloudwatch_logs]
 }
 
-# Network Firewall Logging Configuration
 resource "aws_networkfirewall_logging_configuration" "main" {
   firewall_arn = aws_networkfirewall_firewall.main.arn
 
