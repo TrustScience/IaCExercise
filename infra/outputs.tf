@@ -29,7 +29,7 @@ output "vpc_cidr_block" {
   value       = aws_vpc.main.cidr_block
 }
 
-# ===== ECR Outputs ======
+# ====== ECR Outputs ======
 output "ecr_repository_url" {
   description = "URL of the ECR repository"
   value       = aws_ecr_repository.app.repository_url
@@ -40,7 +40,7 @@ output "ecr_repository_name" {
   value       = aws_ecr_repository.app.name
 }
 
-# ===== ECS Outputs =====
+# ====== ECS Outputs ======
 output "ecs_cluster_name" {
   description = "Name of the ECS cluster"
   value       = aws_ecs_cluster.main.name
@@ -59,4 +59,25 @@ output "ecs_service_name" {
 output "ecs_task_definition_arn" {
   description = "ARN of the ECS task definition"
   value       = aws_ecs_task_definition.app.arn
+}
+
+# ====== ALB Outputs ======
+output "alb_dns_name" {
+  description = "DNS name of the Application Load Balancer"
+  value       = aws_lb.main.dns_name
+}
+
+output "alb_arn" {
+  description = "ARN of the Application Load Balancer"
+  value       = aws_lb.main.arn
+}
+
+output "alb_url" {
+  description = "URL to access the application via ALB"
+  value       = "http://${aws_lb.main.dns_name}"
+}
+
+output "target_group_arn" {
+  description = "ARN of the ALB target group"
+  value       = aws_lb_target_group.app.arn
 }

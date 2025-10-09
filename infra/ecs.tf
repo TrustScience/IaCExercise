@@ -121,11 +121,11 @@ resource "aws_security_group" "ecs_tasks" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "Allow HTTP from anywhere (will be restricted to ALB later)"
-    from_port   = var.container_port
-    to_port     = var.container_port
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "Allow traffic from ALB only"
+    from_port       = var.container_port
+    to_port         = var.container_port
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
   }
 
   egress {
@@ -159,6 +159,12 @@ resource "aws_ecs_service" "app" {
     assign_public_ip = false
   }
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.app.arn
+    container_name   = "${var.project_name}-container"
+    container_port   = var.container_port
+  }
+
   tags = {
     Name = "${var.project_name}-ecs-service"
   }
@@ -167,4 +173,6 @@ resource "aws_ecs_service" "app" {
   lifecycle {
     ignore_changes = [desired_count]
   }
+
+  depends_on = [aws_lb_listener.http]
 }
