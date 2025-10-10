@@ -20,14 +20,6 @@ resource "aws_security_group" "alb" {
     cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
-  egress {
-    description     = "Traffic to ECS tasks only"
-    from_port       = var.container_port
-    to_port         = var.container_port
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_tasks.id]
-  }
-
   tags = {
     Name = "${var.project_name}-alb-sg"
   }
@@ -35,6 +27,17 @@ resource "aws_security_group" "alb" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+# Separate egress rule to avoid circular dependency
+resource "aws_security_group_rule" "alb_to_ecs" {
+  type                     = "egress"
+  description              = "Traffic to ECS tasks only"
+  from_port                = var.container_port
+  to_port                  = var.container_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.alb.id
+  source_security_group_id = aws_security_group.ecs_tasks.id
 }
 
 # checkov:skip=CKV_AWS_91:Access logs not required for this exercise

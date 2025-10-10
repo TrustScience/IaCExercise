@@ -226,14 +226,6 @@ resource "aws_security_group" "ecs_tasks" {
   description = "Security group for ECS Fargate tasks"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
-    description     = "Allow traffic from ALB only"
-    from_port       = var.container_port
-    to_port         = var.container_port
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb.id]
-  }
-
   egress {
     description = "HTTPS to AWS services (ECR, CloudWatch, S3)"
     from_port   = 443
@@ -249,6 +241,17 @@ resource "aws_security_group" "ecs_tasks" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+# Separate ingress rule to avoid circular dependency
+resource "aws_security_group_rule" "ecs_from_alb" {
+  type                     = "ingress"
+  description              = "Allow traffic from ALB only"
+  from_port                = var.container_port
+  to_port                  = var.container_port
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.ecs_tasks.id
+  source_security_group_id = aws_security_group.alb.id
 }
 
 resource "aws_ecs_service" "app" {

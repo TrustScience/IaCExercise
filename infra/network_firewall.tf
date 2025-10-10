@@ -18,7 +18,8 @@ resource "aws_networkfirewall_rule_group" "allow_http_https" {
           source_port      = "ANY"
         }
         rule_option {
-          keyword = "sid:1"
+          keyword  = "sid"
+          settings = ["1"]
         }
       }
 
@@ -33,7 +34,8 @@ resource "aws_networkfirewall_rule_group" "allow_http_https" {
           source_port      = "ANY"
         }
         rule_option {
-          keyword = "sid:2"
+          keyword  = "sid"
+          settings = ["2"]
         }
       }
     }
