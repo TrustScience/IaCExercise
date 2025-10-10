@@ -98,12 +98,11 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Route from public subnets to Internet through firewall endpoints
+# Route from public subnets to Internet through firewall endpoint in first AZ
 resource "aws_route" "public_to_firewall" {
-  count                  = length(var.availability_zones)
   route_table_id         = aws_route_table.public.id
   destination_cidr_block = "0.0.0.0/0"
-  vpc_endpoint_id        = element([for ss in tolist(aws_networkfirewall_firewall.main.firewall_status[0].sync_states) : ss.attachment[0].endpoint_id], count.index)
+  vpc_endpoint_id        = element([for ss in tolist(aws_networkfirewall_firewall.main.firewall_status[0].sync_states) : ss.attachment[0].endpoint_id], 0)
 
   depends_on = [aws_networkfirewall_firewall.main]
 }

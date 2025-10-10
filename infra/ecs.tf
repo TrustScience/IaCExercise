@@ -42,7 +42,7 @@ resource "aws_kms_key_policy" "cloudwatch_logs" {
         Resource = "*"
       },
       {
-        Sid    = "Allow CloudWatch Logs"
+        Sid    = "Allow CloudWatch Logs for ECS"
         Effect = "Allow"
         Principal = {
           Service = "logs.${var.aws_region}.amazonaws.com"
@@ -59,6 +59,27 @@ resource "aws_kms_key_policy" "cloudwatch_logs" {
         Condition = {
           ArnLike = {
             "kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/ecs/${var.project_name}"
+          }
+        }
+      },
+      {
+        Sid    = "Allow CloudWatch Logs for Network Firewall"
+        Effect = "Allow"
+        Principal = {
+          Service = "logs.${var.aws_region}.amazonaws.com"
+        }
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:CreateGrant",
+          "kms:DescribeKey"
+        ]
+        Resource = "*"
+        Condition = {
+          ArnLike = {
+            "kms:EncryptionContext:aws:logs:arn" = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/networkfirewall/${var.project_name}"
           }
         }
       }
