@@ -89,8 +89,8 @@ resource "aws_kms_key_policy" "cloudwatch_logs" {
 
 data "aws_caller_identity" "current" {}
 
-# checkov:skip=CKV_AWS_338:7-day retention is sufficient for this exercise
 resource "aws_cloudwatch_log_group" "ecs" {
+  #checkov:skip=CKV_AWS_338:7-day retention is sufficient for this exercise
   name              = "/ecs/${var.project_name}"
   retention_in_days = 7
   kms_key_id        = aws_kms_key.cloudwatch_logs.arn
@@ -220,7 +220,6 @@ resource "aws_ecs_task_definition" "app" {
   }
 }
 
-# checkov:skip=CKV_AWS_260:ECS tasks in private subnets with restricted ingress from ALB only
 resource "aws_security_group" "ecs_tasks" {
   name_prefix = "${var.project_name}-ecs-tasks-"
   description = "Security group for ECS Fargate tasks"

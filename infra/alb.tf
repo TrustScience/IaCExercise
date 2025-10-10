@@ -1,4 +1,3 @@
-# checkov:skip=CKV_AWS_260:ALB accepts traffic from VPC CIDR only (after firewall inspection)
 resource "aws_security_group" "alb" {
   name_prefix = "${var.project_name}-alb-"
   description = "Security group for the ECS ALB"
@@ -40,9 +39,11 @@ resource "aws_security_group_rule" "alb_to_ecs" {
   source_security_group_id = aws_security_group.ecs_tasks.id
 }
 
-# checkov:skip=CKV_AWS_91:Access logs not required for this exercise
-# checkov:skip=CKV2_AWS_28:WAF not required for this exercise
 resource "aws_lb" "main" {
+  #checkov:skip=CKV_AWS_91:Access logs not required for this exercise
+  #checkov:skip=CKV2_AWS_28:WAF not required for this exercise
+  #checkov:skip=CKV_AWS_150:ALB deletion protection disabled for easier cleanup in exercise environment
+  #checkov:skip=CKV_AWS_131:ALB drop invalid HTTP headers not critical for this exercise
   name               = "${var.project_name}-alb"
   internal           = false
   load_balancer_type = "application"

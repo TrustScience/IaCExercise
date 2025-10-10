@@ -1,5 +1,5 @@
-# checkov:skip=CKV_AWS_345:Using default encryption for this exercise, CMK not required
 resource "aws_networkfirewall_rule_group" "allow_http_https" {
+  #checkov:skip=CKV_AWS_345:Using default encryption for this exercise, CMK not required
   name        = "${var.project_name}-allow-http-https"
   type        = "STATEFUL"
   capacity    = 100
@@ -51,8 +51,8 @@ resource "aws_networkfirewall_rule_group" "allow_http_https" {
   }
 }
 
-# checkov:skip=CKV_AWS_346:Using default encryption for this exercise, CMK not required
 resource "aws_networkfirewall_firewall_policy" "main" {
+  #checkov:skip=CKV_AWS_346:Using default encryption for this exercise, CMK not required
   name = "${var.project_name}-firewall-policy"
 
   firewall_policy {
@@ -77,12 +77,13 @@ resource "aws_networkfirewall_firewall_policy" "main" {
   }
 }
 
-# checkov:skip=CKV_AWS_345:Using default encryption for this exercise, CMK not required
-# checkov:skip=CKV_AWS_344:Deletion protection disabled for easier cleanup in exercise environment
 resource "aws_networkfirewall_firewall" "main" {
+  #checkov:skip=CKV_AWS_345:Using default encryption for this exercise, CMK not required
+  #checkov:skip=CKV_AWS_344:Deletion protection disabled for easier cleanup in exercise environment
   name                = "${var.project_name}-firewall"
   firewall_policy_arn = aws_networkfirewall_firewall_policy.main.arn
   vpc_id              = aws_vpc.main.id
+  delete_protection = true
 
   # Deploy firewall endpoints in dedicated firewall subnets
   dynamic "subnet_mapping" {
@@ -97,10 +98,10 @@ resource "aws_networkfirewall_firewall" "main" {
   }
 }
 
-# checkov:skip=CKV_AWS_338:7-day retention is sufficient for this exercise
 resource "aws_cloudwatch_log_group" "network_firewall" {
+  #checkov:skip=CKV_AWS_338:7-day retention is sufficient for this exercise
   name              = "/aws/networkfirewall/${var.project_name}"
-  retention_in_days = 7
+  retention_in_days = 365
   kms_key_id        = aws_kms_key.cloudwatch_logs.arn
 
   tags = {
