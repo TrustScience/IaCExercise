@@ -1,34 +1,31 @@
-# checkov:skip=CKV_AWS_260:Public ALB intentionally allows HTTP/HTTPS from internet
-# checkov:skip=CKV_AWS_277:ALB requires unrestricted egress to forward traffic to ECS tasks
-# checkov:skip=CKV2_AWS_5:ALB security group requires open egress for health checks and forwarding
+# checkov:skip=CKV_AWS_260:ALB accepts traffic from VPC CIDR only (after firewall inspection)
 resource "aws_security_group" "alb" {
   name_prefix = "${var.project_name}-alb-"
   description = "Security group for the ECS ALB"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "HTTP from anywhere"
+    description = "HTTP from VPC (traffic pre-filtered by Network Firewall)"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
-  # checkov:skip=CKV_AWS_260:Public ALB intentionally allows HTTPS from internet
   ingress {
-    description = "HTTPS from anywhere"
+    description = "HTTPS from VPC (traffic pre-filtered by Network Firewall)"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [aws_vpc.main.cidr_block]
   }
 
   egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "Traffic to ECS tasks only"
+    from_port       = var.container_port
+    to_port         = var.container_port
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_tasks.id]
   }
 
   tags = {

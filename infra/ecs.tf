@@ -221,8 +221,6 @@ resource "aws_ecs_task_definition" "app" {
 }
 
 # checkov:skip=CKV_AWS_260:ECS tasks in private subnets with restricted ingress from ALB only
-# checkov:skip=CKV_AWS_277:ECS tasks require unrestricted egress for pulling images and logging
-# checkov:skip=CKV2_AWS_5:ECS security group requires open egress for ECR pulls and CloudWatch
 resource "aws_security_group" "ecs_tasks" {
   name_prefix = "${var.project_name}-ecs-tasks-"
   description = "Security group for ECS Fargate tasks"
@@ -237,10 +235,10 @@ resource "aws_security_group" "ecs_tasks" {
   }
 
   egress {
-    description = "Allow all outbound traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    description = "HTTPS to AWS services (ECR, CloudWatch, S3)"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
